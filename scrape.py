@@ -9,10 +9,12 @@ BASE_URL = 'https://hackuci-2022.devpost.com/project-gallery?page={page_num}'
 # The name of each column in our CSV file export (The data we are scraping from each project)
 HEADERS = ['Project Name', 'Project Description', 'Likes', 'Comments', 'Thumbnail', 'Is Winner']
 
-def scrape() -> List[List]:
+def scrape(verbose: bool=False) -> List[List]:
     """
     Scrapes all of the submissions for Hack at UCI 2022 and return the data as a list of lists.
     Each i-th inner list represents the data scraped from the i-th project.
+    
+    If verbose set to True, will output all scraped data to the console.
     """
     
     project_gallery_data: List[List] = []    
@@ -33,36 +35,38 @@ def scrape() -> List[List]:
         for project in soup.find_all('div', class_='gallery-item'):
             data = []
             
+            name = project.findChild('h5').text.strip()
+            description = project.findChild('p', class_="small tagline").text.strip()
+            likes = project.findChild('span', class_="count like-count").text.strip()
+            comments = project.findChild('span', class_="count comment-count").text.strip()
+            thumbnail = project.findChild('img', class_="software_thumbnail_image")['src'].strip()
+            is_winner = project.findChild('img', class_='winner') is not None
+            
             # Project Name
-            print(project.findChild('h5').text.strip())
-            data.append(project.findChild('h5').text.strip())
-            
+            data.append(name)
             # Project description
-            print(project.findChild('p', class_="small tagline").text.strip())
-            data.append(project.findChild('p', class_="small tagline").text.strip())
-            
+            data.append(description)
             # Number of likes
-            print(project.findChild('span', class_="count like-count").text.strip())
-            data.append(project.findChild('span', class_="count like-count").text.strip())
-            
+            data.append(likes)
             # Number of comments
-            print(project.findChild('span', class_="count comment-count").text.strip())
-            data.append(project.findChild('span', class_="count comment-count").text.strip())
-            
+            data.append(comments)
             # Link to thumbnail image           
-            print(project.findChild('img', class_="software_thumbnail_image")['src'].strip())
-            data.append(project.findChild('img', class_="software_thumbnail_image")['src'].strip())
-            
+            data.append(thumbnail)
             # Whether the project won a prize
-            if project.findChild('img', class_='winner') is not None:
-                print("Winner")
-                data.append(True)
-            else:
-                data.append(False)
-                
+            data.append(is_winner)
+
+            # Add this project's data to our list of all project data
             project_gallery_data.append(data)
             
-    print(project_gallery_data)
+            if verbose:
+                print('Name:', name)
+                print('Description:', description)
+                print('Number of Likes:', likes)
+                print('Number of Comments:', comments)
+                print('Thumbnail Image:', thumbnail)
+                print('Is Winner:', is_winner)
+                print('-' * 50)
+                                        
     return project_gallery_data
     
 
@@ -70,13 +74,11 @@ def write_to_csv(data: List[List], filename: str, headers: List[str] = HEADERS):
     with open(filename, 'w', newline='') as csvfile:
         # Creating a csv writer object 
         csvwriter = csv.writer(csvfile) 
-            
         # Writing the fields (columns) 
         csvwriter.writerow(headers) 
-            
         # Writing the data (rows) 
         csvwriter.writerows(data)
     
 if __name__ == '__main__':
-    project_data = scrape()
+    project_data = scrape(verbose=True)
     write_to_csv(project_data, 'hackuci22_projects.csv')

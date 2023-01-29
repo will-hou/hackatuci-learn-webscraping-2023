@@ -29,3 +29,6 @@ Install the library dependencies by running `pip install -r requirements.txt`
 # Step 3: Good to Go!
 
 Run `python scrape.py` to scrape the site!
+
+# Reference Slides:
+https://docs.google.com/presentation/d/1WCTYo9waSFRDL7d7FmZ1PZxFI6Er706YiUNFzYxAWIg/edit?usp=sharing
